@@ -167,3 +167,10 @@ def test_valor_energetico_nao_some_quando_so_kj_esta_desmarcado():
 
     linhas = rotulo.montar_linhas({"energiakcal": v(False), "energiaKJ": v(True, "kJ")})
     assert linhas == []
+
+
+def test_texto_alergicos_nao_duplica_prefixo():
+    assert rotulo.texto_alergicos("ALÉRGICOS: contém trigo.") == "ALÉRGICOS: CONTÉM TRIGO."
+    assert rotulo.texto_alergicos("contém trigo.") == "ALÉRGICOS: CONTÉM TRIGO."
+    assert rotulo.texto_alergicos("  ") == ""
+    assert rotulo.texto_alergicos(None) == ""

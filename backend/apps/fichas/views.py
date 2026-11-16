@@ -344,6 +344,7 @@ def ficha_x(request, pk):
         {
             "fichaAtual": ficha,
             "tabelaAtual": tabela,
+            "alergicos": rotulo.texto_alergicos(tabela.informacoesComplementares),
             "linhas": linhas,
             "linhasIndentadas": rotulo.INDENTADOS,
             "pesoAnvisaSemZero": rotulo.peso_anvisa_sem_zero(

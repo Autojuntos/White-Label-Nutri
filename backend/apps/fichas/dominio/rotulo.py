@@ -166,3 +166,16 @@ def ordenar_ingredientes(itens: list[dict]) -> str:
             partes.append(f"{item['nomeFantasia']}")
     texto = ", ".join(partes) + "."
     return texto.capitalize()
+
+
+def texto_alergicos(informacoes: str | None) -> str:
+    """Texto da linha de alérgicos: em maiúsculas, com um único "ALÉRGICOS:".
+
+    Muita ficha já tem o prefixo digitado no campo; antes saía "ALÉRGICOS: ALÉRGICOS:".
+    """
+    texto = (informacoes or "").strip().upper()
+    if not texto:
+        return ""
+    while texto.startswith("ALÉRGICOS:") or texto.startswith("ALERGICOS:"):
+        texto = texto[len("ALÉRGICOS:"):].strip()
+    return f"ALÉRGICOS: {texto}" if texto else ""
