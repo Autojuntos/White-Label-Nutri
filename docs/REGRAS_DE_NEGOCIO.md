@@ -110,8 +110,9 @@ terminados em ponto, com a primeira letra maiúscula.
 ### BR-030 — Estrutura da tabela final
 Ordem e agrupamento das linhas seguem o campo `ordem_rotulo` do registro de nutrientes.
 Saem indentadas: açúcares totais e adicionados, gorduras saturadas, trans, mono e
-poli-insaturadas, colesterol. A linha de valor energético só aparece se kcal **e** kJ
-estiverem marcados para exibição.
+poli-insaturadas, colesterol. A linha de valor energético aparece sempre que kcal estiver
+marcado para exibição; o rótulo mostra só kcal, então a marcação do kJ não a afeta (até
+nov/2026 a linha sumia se kJ fosse desmarcado, o que deixava rótulos sem valor energético).
 
 ## Fichas e receitas
 

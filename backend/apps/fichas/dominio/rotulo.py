@@ -121,9 +121,10 @@ def montar_linhas(
     linhas: list[list] = []
     vd_trans = 0  # BR-009: gorduras trans sem %VD
 
+    # BR-030: o rótulo só exibe kcal; o "mostrar" do kJ não esconde a linha
+    # (antes escondia, e desmarcar kJ sumia com o valor energético, que é obrigatório).
     kcal = valores.get("energiakcal")
-    kj = valores.get("energiaKJ")
-    if kcal and kj and kcal.mostrar and kj.mostrar:
+    if kcal and kcal.mostrar:
         linhas.append(
             ["Valor energético", str(tira_zero(kcal.arred)), kcal.vd,
              kcal.unidade, round(kcal.por_100g)]
