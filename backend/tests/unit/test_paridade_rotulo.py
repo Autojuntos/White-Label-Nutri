@@ -103,6 +103,12 @@ def test_paridade_rotulo_completa(fichax, paridade):
         }
         extras = [(e[0], e[2], e[3]) for e in g["extras"]]
         minhas = _normaliza(rotulo.montar_linhas(valores, extras))
+        kcal, kj = valores.get("energiakcal"), valores.get("energiaKJ")
+        if kcal and kj and kcal.mostrar and not kj.mostrar:
+            # Divergência intencional (BR-030): o original sumia com o valor energético
+            # quando só o kJ estava desmarcado; agora a linha continua no rótulo.
+            assert minhas[0][0] == "Valor energético"
+            minhas = minhas[1:]
 
         # --- linhas da tabela ---
         if len(minhas) != len(esperado["linhas"]):
@@ -150,3 +156,21 @@ def test_paridade_rotulo_completa(fichax, paridade):
         f"{len(divergencias)} divergências (primeiras 5): {divergencias[:5]}"
     )
     assert manganes_fix_verificado >= 0  # informativo
+
+
+def test_valor_energetico_nao_some_quando_so_kj_esta_desmarcado():
+    def v(mostrar, unidade="kcal"):
+        return rotulo.ValoresNutriente(arred=186, vd=9, unidade=unidade, por_100g=372, mostrar=mostrar)
+
+    linhas = rotulo.montar_linhas({"energiakcal": v(True), "energiaKJ": v(False, "kJ")})
+    assert linhas[0][:2] == ["Valor energético", "186"]
+
+    linhas = rotulo.montar_linhas({"energiakcal": v(False), "energiaKJ": v(True, "kJ")})
+    assert linhas == []
+
+
+def test_texto_alergicos_nao_duplica_prefixo():
+    assert rotulo.texto_alergicos("ALÉRGICOS: contém trigo.") == "ALÉRGICOS: CONTÉM TRIGO."
+    assert rotulo.texto_alergicos("contém trigo.") == "ALÉRGICOS: CONTÉM TRIGO."
+    assert rotulo.texto_alergicos("  ") == ""
+    assert rotulo.texto_alergicos(None) == ""

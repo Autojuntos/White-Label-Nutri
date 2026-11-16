@@ -33,9 +33,10 @@
 .rotulo-nota { font-size: 8px; text-align: left; }
 .rotulo-texto { text-align: justify; font-size: 10.5px; }
 .sem-quebra { white-space: nowrap; }
-.alergicos { text-transform: uppercase; }
-.linha-cabeca1 { border: 0; border-top: 1px solid #000; margin: 4px 0; }
-.linha-cabeca2 { border: 0; border-top: 4px solid #000; margin: 4px 0; }
+.rotulo-vertical td.rotulo-linha-fina,
+.rotulo-linear td.rotulo-linha-fina { border-bottom: 1px solid #000; }
+.rotulo-vertical td.rotulo-linha-grossa,
+.rotulo-linear td.rotulo-linha-grossa { border-bottom: 4px solid #000; }
 
 /* O bloco copiável mantém a tipografia e as cores do Bootstrap original: o
    fallback de cópia (execCommand) leva os estilos calculados para o documento. */

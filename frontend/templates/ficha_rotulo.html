@@ -86,15 +86,14 @@
   <h2 class="h6 text-secondary text-uppercase">Modelo de tabela vertical</h2>
   <div class="table-responsive mb-4">
     <table class="rotulo-vertical">
+      {# Linhas do cabeçalho como bordas de célula (não hr): o Docs só preserva bordas de tabela. #}
       <tr>
-        <td colspan="4" class="rotulo-cabecalho">
-          <strong>INFORMAÇÃO NUTRICIONAL</strong>
-          <hr class="linha-cabeca1">
-          <div class="text-start">
-            Porções por embalagem: {{ numPorcoesExibicao }}<br>
-            Porção: {{ pesoAnvisaSemZero }}&nbsp;g ({{ fichaAtual.medCaseiraPorcao }})
-          </div>
-          <hr class="linha-cabeca2">
+        <td colspan="4" class="rotulo-cabecalho rotulo-linha-fina"><b>INFORMAÇÃO NUTRICIONAL</b></td>
+      </tr>
+      <tr>
+        <td colspan="4" class="primeira-coluna rotulo-linha-grossa">
+          Porções por embalagem: {{ numPorcoesExibicao }}<br>
+          Porção: {{ pesoAnvisaSemZero }}&nbsp;g ({{ fichaAtual.medCaseiraPorcao }})
         </td>
       </tr>
       <tr>
@@ -120,8 +119,8 @@
   </div>
 
   <p class="rotulo-texto">Ingredientes: {{ ordemIngredientes }}</p>
-  {% if tabelaAtual.informacoesComplementares %}
-    <p class="rotulo-texto"><b class="alergicos">ALÉRGICOS: {{ tabelaAtual.informacoesComplementares }}</b></p>
+  {% if alergicos %}
+    <p class="rotulo-texto"><b>{{ alergicos }}</b></p>
   {% endif %}
   {% if lupa_img %}
     <div class="text-start mb-4">
@@ -134,28 +133,19 @@
   <div class="table-responsive mb-4">
     <table class="rotulo-linear">
       <tr>
-        <td>
-          <div class="text-start">
-            <strong>INFORMAÇÃO NUTRICIONAL</strong>
-            <hr class="linha-cabeca1">
-            Porções por embalagem: {{ numPorcoesExibicao }} <b>•</b>
-            Porção: {{ pesoAnvisaSemZero }}&nbsp;g ({{ fichaAtual.medCaseiraPorcao }})
-            <hr class="linha-cabeca2">
-          </div>
+        <td class="rotulo-linha-fina"><b>INFORMAÇÃO NUTRICIONAL</b></td>
+      </tr>
+      <tr>
+        <td class="rotulo-linha-grossa">
+          Porções por embalagem: {{ numPorcoesExibicao }} <b>•</b>
+          Porção: {{ pesoAnvisaSemZero }}&nbsp;g ({{ fichaAtual.medCaseiraPorcao }})
         </td>
       </tr>
       <tr>
         <td>
           <p class="rotulo-texto mb-0">Por 100&nbsp;g (<b>{{ pesoAnvisaSemZero }}&nbsp;g</b>, %VD*):
-            {% for linha in linhas %}
-              {% if linha|length > 3 %}
-                {{ linha.0 }} <span class="sem-quebra">{{ linha.4 }}&nbsp;{{ linha.3 }}</span>
-                (<b>{{ linha.1 }}&nbsp;{{ linha.3 }}</b>{% if linha.2 != "" %}, {{ linha.2 }}%{% endif %})
-                {% if linha.0 == "Carboidratos totais" %}, dos quais
-                {% elif linha.0 == "Gorduras Totais" %}, das quais
-                {% elif forloop.last %}.{% else %}, <b>•</b>{% endif %}
-              {% endif %}
-            {% endfor %}
+            {# Sem quebras entre as tags: espaço solto aqui vira " ," no texto colado. #}
+            {% for linha in linhas %}{% if linha|length > 3 %}{{ linha.0 }} <span class="sem-quebra">{{ linha.4 }}&nbsp;{{ linha.3 }}</span> (<b>{{ linha.1 }}&nbsp;{{ linha.3 }}</b>{% if linha.2 != "" %}, {{ linha.2 }}%{% endif %}){% if linha.0 == "Carboidratos totais" %}, dos quais {% elif linha.0 == "Gorduras Totais" %}, das quais {% elif forloop.last %}.{% else %}, <b>•</b> {% endif %}{% endif %}{% endfor %}
           </p>
         </td>
       </tr>
@@ -166,8 +156,8 @@
   </div>
 
   <p class="rotulo-texto">Ingredientes: {{ ordemIngredientes }}</p>
-  {% if tabelaAtual.informacoesComplementares %}
-    <p class="rotulo-texto"><b class="alergicos">ALÉRGICOS: {{ tabelaAtual.informacoesComplementares }}</b></p>
+  {% if alergicos %}
+    <p class="rotulo-texto"><b>{{ alergicos }}</b></p>
   {% endif %}
   {% if lupa_img %}
     <div class="text-start">

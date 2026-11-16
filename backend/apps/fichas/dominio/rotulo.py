@@ -121,9 +121,10 @@ def montar_linhas(
     linhas: list[list] = []
     vd_trans = 0  # BR-009: gorduras trans sem %VD
 
+    # BR-030: o rótulo só exibe kcal; o "mostrar" do kJ não esconde a linha
+    # (antes escondia, e desmarcar kJ sumia com o valor energético, que é obrigatório).
     kcal = valores.get("energiakcal")
-    kj = valores.get("energiaKJ")
-    if kcal and kj and kcal.mostrar and kj.mostrar:
+    if kcal and kcal.mostrar:
         linhas.append(
             ["Valor energético", str(tira_zero(kcal.arred)), kcal.vd,
              kcal.unidade, round(kcal.por_100g)]
@@ -165,3 +166,16 @@ def ordenar_ingredientes(itens: list[dict]) -> str:
             partes.append(f"{item['nomeFantasia']}")
     texto = ", ".join(partes) + "."
     return texto.capitalize()
+
+
+def texto_alergicos(informacoes: str | None) -> str:
+    """Texto da linha de alérgicos: em maiúsculas, com um único "ALÉRGICOS:".
+
+    Muita ficha já tem o prefixo digitado no campo; antes saía "ALÉRGICOS: ALÉRGICOS:".
+    """
+    texto = (informacoes or "").strip().upper()
+    if not texto:
+        return ""
+    while texto.startswith("ALÉRGICOS:") or texto.startswith("ALERGICOS:"):
+        texto = texto[len("ALÉRGICOS:"):].strip()
+    return f"ALÉRGICOS: {texto}" if texto else ""

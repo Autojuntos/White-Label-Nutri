@@ -34,9 +34,48 @@
     };
   }
 
+  // O Google Docs ignora as classes CSS da página ao colar: só lê estilo inline e
+  // atributos. Sem isso a tabela chega sem bordas, tamanhos e alinhamentos.
+  const PROPRIEDADES = [
+    "border-top-width", "border-top-style", "border-top-color",
+    "border-right-width", "border-right-style", "border-right-color",
+    "border-bottom-width", "border-bottom-style", "border-bottom-color",
+    "border-left-width", "border-left-style", "border-left-color",
+    "border-collapse", "padding-top", "padding-right", "padding-bottom", "padding-left",
+    "font-family", "font-size", "font-weight", "color", "background-color",
+    "text-align", "vertical-align", "white-space", "width",
+  ];
+
+  function comEstiloInline(original) {
+    const copia = original.cloneNode(true);
+    const origens = [original].concat(Array.from(original.querySelectorAll("*")));
+    const destinos = [copia].concat(Array.from(copia.querySelectorAll("*")));
+    origens.forEach(function (el, i) {
+      const destino = destinos[i];
+      const calculado = window.getComputedStyle(el);
+      const partes = PROPRIEDADES.map(function (prop) {
+        return prop + ": " + calculado.getPropertyValue(prop);
+      });
+      const proprio = el.getAttribute("style");
+      destino.setAttribute("style", partes.join("; ") + (proprio ? "; " + proprio : ""));
+      destino.removeAttribute("class");
+      if (el.tagName === "TABLE") {
+        destino.setAttribute("cellspacing", "0");
+        destino.setAttribute("cellpadding", "5");
+        destino.style.width = el.getBoundingClientRect().width + "px";
+      }
+    });
+    return copia;
+  }
+
   function copiarSelecao(elemento) {
+    // Fallback: seleciona uma cópia já com estilo inline, fora da tela.
+    const copia = comEstiloInline(elemento);
+    copia.style.position = "fixed";
+    copia.style.left = "-10000px";
+    document.body.appendChild(copia);
     const range = document.createRange();
-    range.selectNode(elemento);
+    range.selectNode(copia);
     const selecao = window.getSelection();
     selecao.removeAllRanges();
     selecao.addRange(range);
@@ -47,6 +86,7 @@
       ok = false;
     }
     selecao.removeAllRanges();
+    copia.remove();
     return ok;
   }
 
@@ -55,7 +95,7 @@
       try {
         await navigator.clipboard.write([
           new ClipboardItem({
-            "text/html": new Blob([elemento.innerHTML], { type: "text/html" }),
+            "text/html": new Blob([comEstiloInline(elemento).innerHTML], { type: "text/html" }),
             "text/plain": new Blob([elemento.innerText], { type: "text/plain" }),
           }),
         ]);
