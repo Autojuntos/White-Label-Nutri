@@ -18,6 +18,11 @@ class Membro(models.Model):
 
 # Model dos ingredientes
 class Ingrediente(models.Model):
+   # Unidades em que o ingrediente pode ser cadastrado:
+  UNIDADE_G = "g"
+  UNIDADE_ML = "mL"
+  UNIDADES = [(UNIDADE_G, "g"), (UNIDADE_ML, "mL")]
+
   # Relacionamentos:
   autorIng = models.ForeignKey(Membro, on_delete=models.CASCADE)
 
@@ -29,6 +34,8 @@ class Ingrediente(models.Model):
   numRef = models.IntegerField(null=True, blank=True, default=0)  # Número de referência na tabela de origem, caso venha por exemplo da tabela IBGE. É opcional
   dataCriacao = models.DateField(null=False, blank=False, default=datetime.date.today)
   qtdeDoIngrediente = models.FloatField(default=100) # Quantidade desse ingrediente que contêm a quantidade de nutrientes descritas. Quando adicionado ingrediente pelo upload ele vale Default que é 100g, já que esse é o padrão da TACO.
+  unidade = models.CharField(max_length=2, choices=UNIDADES, default=UNIDADE_G)  # Unidade em que o ingrediente foi cadastrado. A qtdeDoIngrediente continua sempre gravada em gramas
+  densidade = models.FloatField(null=True, blank=True)  # Em g/mL. Obrigatória quando a unidade é mL (essa validação entra no formulário)
 
   # 1 Proteína
   proteinas = models.FloatField(null=True, blank=True, default=0)
