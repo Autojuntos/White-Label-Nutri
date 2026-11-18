@@ -5,6 +5,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.db.models.functions import Lower
+from apps.fichas.dominio.conversao import gramas_para_ml, ml_para_gramas
 
 from apps.fichas.models import (
     Chave,
@@ -133,6 +134,7 @@ class IngredienteForm(forms.ModelForm):
         model = Ingrediente
         fields = [
             "autorIng", "nomeIng", "composicao", "origemDosDados", "qtdeDoIngrediente",
+            "unidade", "densidade",
             "dataCriacao", "numRef",
             "proteinas", "gordTotais", "acucaresTotais", "carboidratos", "fibras",
             "energiakcal", "energiaKJ", "calcio", "ferro", "magnesio", "fosforo",
@@ -149,16 +151,45 @@ class IngredienteForm(forms.ModelForm):
             "nomeIng": "Ingrediente",
             "origemDosDados": "Fonte / Marca",
             "qtdeDoIngrediente": "Quantidade do ingrediente (g)",
+            "unidade": "Unidade",
+            "densidade": "Densidade (g/mL)",
             "numRef": "Nº de referência",
         }
         help_texts = {
             "numRef": "Número do alimento na tabela de origem (ex.: TACO). Deixe 0 se não houver.",
+            "densidade": "Quantos gramas pesa 1 mL do ingrediente (ex.: 1.2).",
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["autorIng"].queryset = Membro.objects.all().order_by(Lower("nome"))
+        # Ingrediente em mL: mostra a quantidade em mL (no banco ela fica em gramas).
+        instancia = self.instance
+        if instancia.pk and instancia.unidade == Ingrediente.UNIDADE_ML and instancia.densidade:
+            self.initial["qtdeDoIngrediente"] = round(
+                gramas_para_ml(instancia.qtdeDoIngrediente, instancia.densidade), 6
+            )
         aplicar_classes_bootstrap(self)
+
+    def clean(self):
+        dados = super().clean()
+        if dados.get("unidade") == Ingrediente.UNIDADE_ML:
+            densidade = dados.get("densidade")
+            if densidade is None or densidade <= 0:
+                if "densidade" not in self.errors:
+                    self.add_error(
+                        "densidade",
+                        "Informe a densidade (maior que zero) para ingredientes em mL.",
+                    )
+            elif dados.get("qtdeDoIngrediente") is not None:
+                # O sistema sempre grava em gramas. Se a densidade mudou, os gramas
+                # são refeitos aqui com a densidade nova.
+                dados["qtdeDoIngrediente"] = round(
+                    ml_para_gramas(dados["qtdeDoIngrediente"], densidade), 6
+                )
+        else:
+            dados["densidade"] = None  # em gramas, a densidade não se aplica
+        return dados
 
 
 class IngredienteFiltroForm(forms.Form):
