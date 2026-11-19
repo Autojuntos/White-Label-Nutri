@@ -320,6 +320,7 @@ def test_ingrediente_normaliza_para_100g(logado, membro):
         "composicao": "",
         "origemDosDados": "Marca X",
         "qtdeDoIngrediente": 50,
+        "unidade": "g",
         "numRef": 0,
         "dataCriacao": "10/01/2025",
         "proteinas": 5,
@@ -336,7 +337,7 @@ def test_nome_e_marca_duplicados_sao_recusados(logado, membro, ingrediente):
     resp = logado.post(
         "/registrarIngrediente",
         {"autorIng": membro.pk, "nomeIng": "Farinha de trigo", "composicao": "",
-         "origemDosDados": "TACO", "qtdeDoIngrediente": 100, "numRef": 0,
+         "origemDosDados": "TACO", "qtdeDoIngrediente": 100, "unidade": "g", "numRef": 0,
          "dataCriacao": "10/01/2025"},
         follow=True,
     )
@@ -348,7 +349,7 @@ def test_mesmo_nome_com_outra_marca_e_aceito(logado, membro, ingrediente):
     logado.post(
         "/registrarIngrediente",
         {"autorIng": membro.pk, "nomeIng": "Farinha de trigo", "composicao": "",
-         "origemDosDados": "Tio Chico", "qtdeDoIngrediente": 100, "numRef": 0,
+         "origemDosDados": "Tio Chico", "qtdeDoIngrediente": 100, "unidade": "g", "numRef": 0,
          "dataCriacao": "10/01/2025"},
     )
     assert Ingrediente.objects.filter(nomeIng="Farinha de trigo").count() == 2
@@ -681,7 +682,7 @@ def test_adicionado_manualmente_saiu_da_tela_sem_perder_o_valor(logado, membro, 
     logado.post(
         f"/editarIngrediente/{ingrediente.pk}",
         {"autorIng": membro.pk, "nomeIng": "Farinha de trigo", "composicao": "",
-         "origemDosDados": "TACO", "qtdeDoIngrediente": 100, "numRef": 7,
+         "origemDosDados": "TACO", "qtdeDoIngrediente": 100, "unidade": "g", "numRef": 7,
          "dataCriacao": "2024-01-10"},
     )
     ingrediente.refresh_from_db()
