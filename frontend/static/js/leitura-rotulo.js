@@ -36,6 +36,10 @@
       if (!campo) return;
       if (SO_SE_VAZIO.includes(chave) && campo.value.trim()) return;
       campo.value = resultado.campos[chave];
+      if (chave === "unidade") {
+        // Avisa o cadastro que a unidade mudou (mostra a densidade quando for mL).
+        campo.dispatchEvent(new Event("change", { bubbles: true }));
+      }
       campo.classList.add("campo-lido");
       if (resultado.conferir.includes(chave)) campo.classList.add("is-invalid");
       preenchidos += 1;
