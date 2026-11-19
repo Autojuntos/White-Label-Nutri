@@ -61,6 +61,11 @@ class LeituraRotulo(BaseModel):
     e_tabela_nutricional: bool = Field(
         description="false se a imagem não mostra uma tabela nutricional legível."
     )
+    em_ml: bool = Field(
+        default=False,
+        description="true se a tabela é de um líquido, com valores por 100 ml e porção "
+        "em ml; false se os valores são por 100 g.",
+    )
     porcao_g: float | None = Field(
         default=None, description="Tamanho da porção em gramas (ou ml), se informado."
     )
@@ -82,6 +87,8 @@ Você lê tabelas de informação nutricional de rótulos brasileiros (ANVISA) e
 - Transcreva os números exatamente como estão no rótulo. Vírgula é separador decimal.
 - Preencha por_100g com a coluna de 100 g (ou 100 ml) e por_porcao com a coluna da
   porção, quando existirem. Ignore a coluna de %VD.
+- Se a coluna base for de 100 ml (bebidas, leites, óleos e outros líquidos), marque
+  em_ml como true. Os números ficam exatamente como no rótulo: não converta ml em gramas.
 - Converta para a unidade pedida em cada campo quando o rótulo usar outra
   (ex.: μg → mg divide por 1000) e registre a conversão em avisos.
 - Vitamina A vai em UM só campo, sem converter nem copiar para os outros:
@@ -165,6 +172,7 @@ def montar_resultado(leitura: LeituraRotulo) -> dict:
         raise FalhaNaLeitura("Não consegui ler os valores da tabela. Tente outra foto.")
 
     campos: dict = {"qtdeDoIngrediente": 100 if tem_100g else leitura.porcao_g}
+    campos["unidade"] = "mL" if leitura.em_ml else "g"
     conferir: list[str] = []
     for chave, valor in valores.items():
         if valor is None:
@@ -184,6 +192,8 @@ def montar_resultado(leitura: LeituraRotulo) -> dict:
             campos[campo] = origem.strip()
 
     avisos = list(leitura.avisos)
+    if leitura.em_ml:
+        avisos.insert(0, "A tabela é em mL: informe a densidade do ingrediente para converter em gramas.")
     if conferir:
         avisos.insert(0, "As colunas de 100 g e da porção não batem nos campos em vermelho: confira.")
     return {"campos": campos, "conferir": conferir, "avisos": avisos}
