@@ -37,6 +37,7 @@ def recalcular_tabela(ficha: Ficha) -> Tabela:
                     n.chave: getattr(item.ingrediente, f"{n.chave}_100g")
                     for n in NUTRIENTES
                 },
+                tipo_fibra=getattr(item.ingrediente, "tipo_fibra", "nao_informado") or "nao_informado",
             )
             for item in itens
         ],
@@ -94,6 +95,7 @@ def conferir_tabela(ficha, tabela) -> dict:
             ItemReceita(
                 peso_liquido=item.pesoLiquido,
                 ing_100g={n.chave: getattr(item.ingrediente, f"{n.chave}_100g") for n in NUTRIENTES},
+                tipo_fibra=getattr(item.ingrediente, "tipo_fibra", "nao_informado") or "nao_informado",
             )
             for item in itens
         ],
