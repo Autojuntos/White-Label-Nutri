@@ -15,6 +15,19 @@ class Membro(models.Model):
   # Visualização:
   def __str__(self):
     return self.nome
+  
+#Constantes TIPO_FIBRA
+TIPO_FIBRA_NAO_INFORMADO = "nao_informado"
+TIPO_FIBRA_SOLUVEL = "soluvel"
+TIPO_FIBRA_POLIDEXTROSE = "polidextrose"
+TIPO_FIBRA_INSOLUVEL = "insoluvel"
+
+TIPOS_FIBRA = [
+(TIPO_FIBRA_NAO_INFORMADO, "Não informado"),
+(TIPO_FIBRA_SOLUVEL, "Solúvel (2 kcal/g)"),
+(TIPO_FIBRA_POLIDEXTROSE, "Polidextrose (1 kcal/g)"),
+(TIPO_FIBRA_INSOLUVEL, "Insolúvel (0 kcal/g)"),
+]
 
 # Model dos ingredientes
 class Ingrediente(models.Model):
@@ -29,6 +42,8 @@ class Ingrediente(models.Model):
   numRef = models.IntegerField(null=True, blank=True, default=0)  # Número de referência na tabela de origem, caso venha por exemplo da tabela IBGE. É opcional
   dataCriacao = models.DateField(null=False, blank=False, default=datetime.date.today)
   qtdeDoIngrediente = models.FloatField(default=100) # Quantidade desse ingrediente que contêm a quantidade de nutrientes descritas. Quando adicionado ingrediente pelo upload ele vale Default que é 100g, já que esse é o padrão da TACO.
+  #novo campo
+  tipo_fibra = models.CharField(max_length=20, choices=TIPOS_FIBRA, default=TIPO_FIBRA_NAO_INFORMADO, blank=True)
 
   # 1 Proteína
   proteinas = models.FloatField(null=True, blank=True, default=0)

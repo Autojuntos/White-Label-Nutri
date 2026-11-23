@@ -14,6 +14,7 @@ from apps.fichas.models import (
     Membro,
     Nutriente,
     Tabela,
+    TIPO_FIBRA_NAO_INFORMADO,
 )
 
 
@@ -133,7 +134,7 @@ class IngredienteForm(forms.ModelForm):
         model = Ingrediente
         fields = [
             "autorIng", "nomeIng", "composicao", "origemDosDados", "qtdeDoIngrediente",
-            "dataCriacao", "numRef",
+            "dataCriacao", "numRef", "tipo_fibra",
             "proteinas", "gordTotais", "acucaresTotais", "carboidratos", "fibras",
             "energiakcal", "energiaKJ", "calcio", "ferro", "magnesio", "fosforo",
             "potassio", "sodio", "zinco", "cobre", "manganes",
@@ -150,6 +151,7 @@ class IngredienteForm(forms.ModelForm):
             "origemDosDados": "Fonte / Marca",
             "qtdeDoIngrediente": "Quantidade do ingrediente (g)",
             "numRef": "Nº de referência",
+            "tipo_fibra": "Tipo de fibra",
         }
         help_texts = {
             "numRef": "Número do alimento na tabela de origem (ex.: TACO). Deixe 0 se não houver.",
@@ -158,7 +160,26 @@ class IngredienteForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["autorIng"].queryset = Membro.objects.all().order_by(Lower("nome"))
+        if not self.instance.pk:
+            self.initial["tipo_fibra"] = ""
         aplicar_classes_bootstrap(self)
+
+    def clean(self):
+        dados = super().clean()
+        fibras = dados.get("fibras") or 0
+        tipo_fibra = dados.get("tipo_fibra")
+        # Se não escolheu nada e fibras é zero, salva como "não informado":
+        if not tipo_fibra:
+            dados["tipo_fibra"] = TIPO_FIBRA_NAO_INFORMADO
+            self.cleaned_data["tipo_fibra"] = TIPO_FIBRA_NAO_INFORMADO
+        # Requisito 3: Obrigatório ao cadastrar um ingrediente novo com fibra > 0
+        if not self.instance.pk and fibras > 0:
+            if not tipo_fibra or tipo_fibra == TIPO_FIBRA_NAO_INFORMADO:
+                self.add_error(
+                    "tipo_fibra",
+                    "O tipo de fibra é obrigatório para ingredientes novos com fibras acima de zero.",
+                )
+        return dados   
 
 
 class IngredienteFiltroForm(forms.Form):
