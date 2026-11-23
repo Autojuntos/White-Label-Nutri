@@ -29,7 +29,7 @@ NUTRIENTES: tuple[NutrienteDef, ...] = (
     NutrienteDef("proteinas", "g", 50, True, "Proteínas", 5, limite_zero=0.5),
     NutrienteDef("gordTotais", "g", 65, True, "Gorduras Totais", 6, limite_zero=0.5),
     NutrienteDef("carboidratos", "g", 300, True, "Carboidratos totais", 2, limite_zero=0.5),
-    NutrienteDef("fibras", "g", 25, True, "Fibra Alimentar", 12, limite_zero=0.5),
+    NutrienteDef("fibras", "g", 25, True, "Fibras Alimentares", 12, limite_zero=0.5),
     NutrienteDef("energiakcal", "kcal", 2000, True, "Valor energético", 1, limite_zero=4),
     NutrienteDef("energiaKJ", "kJ", 8400, True, None, None, limite_zero=17),
     NutrienteDef("calcio", "mg", 1000, False, "Cálcio", 14),

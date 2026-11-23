@@ -3,23 +3,18 @@ reproduzir o attTabela original em TODAS as fichas do backup (oráculo
 golden_paridade.json.gz, gerado pelo código original — 1.556 fichas com
 recálculo bem-sucedido; 2 fichas com dados nulos crasham o próprio original).
 """
-import gzip
-import json
 import math
-from pathlib import Path
 
 import pytest
 
 from apps.fichas.dominio.calculo import EntradaCalculo, ItemReceita, calcular
 from apps.fichas.dominio.nutrientes import NUTRIENTES
-
-GOLDEN = Path(__file__).resolve().parent.parent / "golden" / "golden_paridade.json.gz"
+from tests.golden_loader import carregar_golden
 
 
 @pytest.fixture(scope="module")
 def golden():
-    with gzip.open(GOLDEN, "rt", encoding="utf-8") as f:
-        return json.load(f)["fichas"]
+    return carregar_golden("golden_paridade.json.gz")["fichas"]
 
 
 def _quase_igual(a, b):
