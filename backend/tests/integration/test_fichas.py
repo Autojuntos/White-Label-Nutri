@@ -357,6 +357,60 @@ def test_mesmo_nome_com_outra_marca_e_aceito(logado, membro, ingrediente):
     )
 
 
+def test_tipo_fibra_obrigatorio_quando_tem_fibra(logado, membro):
+    resp = logado.post(
+        "/registrarIngrediente",
+        {
+            "autorIng": membro.pk,
+            "nomeIng": "Farelo de Aveia",
+            "origemDosDados": "Marca X",
+            "qtdeDoIngrediente": 100,
+            "fibras": 10,
+            "tipo_fibra": "nao_informado",
+            "dataCriacao": "10/01/2025",
+        },
+    )
+    assert resp.status_code == 200
+    assert "tipo de fibra é obrigatório" in resp.content.decode()
+    assert not Ingrediente.objects.filter(nomeIng="Farelo de Aveia").exists()
+
+
+def test_tipo_fibra_valido_e_salvo(logado, membro):
+    resp = logado.post(
+        "/registrarIngrediente",
+        {
+            "autorIng": membro.pk,
+            "nomeIng": "Farelo de Aveia",
+            "origemDosDados": "Marca X",
+            "qtdeDoIngrediente": 100,
+            "fibras": 10,
+            "tipo_fibra": "soluvel",
+            "dataCriacao": "10/01/2025",
+        },
+    )
+    assert resp.status_code == 302
+    ing = Ingrediente.objects.get(nomeIng="Farelo de Aveia")
+    assert ing.tipo_fibra == "soluvel"
+
+
+def test_tipo_fibra_opcional_quando_sem_fibra(logado, membro):
+    resp = logado.post(
+        "/registrarIngrediente",
+        {
+            "autorIng": membro.pk,
+            "nomeIng": "Sal refinado",
+            "origemDosDados": "Marca Y",
+            "qtdeDoIngrediente": 100,
+            "fibras": 0,
+            "tipo_fibra": "",
+            "dataCriacao": "10/01/2025",
+        },
+    )
+    assert resp.status_code == 302
+    ing = Ingrediente.objects.get(nomeIng="Sal refinado")
+    assert ing.tipo_fibra == "nao_informado"
+
+
 def test_receita_escolhe_ingrediente_pelo_nome_com_marca(logado, ficha, ingrediente, membro):
     outra = Ingrediente.objects.create(
         autorIng=membro, nomeIng="Farinha de trigo", origemDosDados="Tio Chico",
@@ -640,6 +694,7 @@ def test_ler_rotulo_devolve_campos_para_o_formulario(logado, settings, monkeypat
     assert campos["proteinas"] == 10
     assert campos["origemDosDados"] == "Mãe Terra"
     assert not Ingrediente.objects.exists()  # só pré-preenche, não salva
+    assert "tipo_fibra" not in campos  # a leitura por foto não preenche o tipo de fibra
 
 
 def test_ler_rotulo_sem_chave_responde_503(logado, settings):

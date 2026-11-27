@@ -27,7 +27,7 @@ CHAVES = tuple(n.chave for n in NUTRIENTES)
 class ItemReceita:
     peso_liquido: float
     ing_100g: dict[str, float]  # chave do nutriente -> valor por 100 g do ingrediente
-
+    tipo_fibra: str = "nao_informado"
 
 @dataclass
 class EntradaCalculo:
@@ -64,9 +64,31 @@ def calcular(
                 acumulado += (item.ing_100g.get(chave) or 0) / 100 * peso
         r.total[chave] = acumulado
 
-    # BR-003 — energia por Atwater
+    # BR-003 — energia por Atwater (com tipo de fibra)
+    fibra_soluvel = 0.0
+    polidextrose = 0.0
+    fibra_insoluvel = 0.0
+
+    for item in entrada.itens:
+        peso = item.peso_liquido or 0
+        fibras_item = (item.ing_100g.get("fibras") or 0) / 100 * peso
+        tipo = getattr(item, "tipo_fibra", "nao_informado") or "nao_informado"
+        if tipo == "soluvel":
+            fibra_soluvel += fibras_item
+        elif tipo == "polidextrose":
+            polidextrose += fibras_item
+        elif tipo == "insoluvel":
+            fibra_insoluvel += fibras_item
+
+    fibras_tipo_informado = fibra_soluvel + polidextrose + fibra_insoluvel
+    carboidratos_efetivos = r.total["carboidratos"] - fibras_tipo_informado
+
     r.total["energiakcal"] = (
-        r.total["proteinas"] * 4 + r.total["carboidratos"] * 4 + r.total["gordTotais"] * 9
+        r.total["proteinas"] * 4
+        + carboidratos_efetivos * 4
+        + fibra_soluvel * 2
+        + polidextrose * 1
+        + r.total["gordTotais"] * 9
     )
     r.total["energiaKJ"] = r.total["energiakcal"] * 4.184
 
