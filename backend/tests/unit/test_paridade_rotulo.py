@@ -7,15 +7,12 @@ original usa magnesio_100g; a nova versão usa manganes_100g. Para essas linhas 
 teste compara as demais colunas e verifica que o valor do golden é exatamente o
 valor bugado (prova de que a divergência é o fix, não um erro novo).
 """
-import gzip
 import json
-from pathlib import Path
 
 import pytest
 
 from apps.fichas.dominio import rotulo
-
-GOLDEN_DIR = Path(__file__).resolve().parent.parent / "golden"
+from tests.golden_loader import carregar_golden
 
 # sha1[:12] das imagens base64 do original → combinação canônica
 LUPA_POR_COMBINACAO = {
@@ -30,19 +27,14 @@ LUPA_POR_COMBINACAO = {
 }
 
 
-def _carrega(nome):
-    with gzip.open(GOLDEN_DIR / nome, "rt", encoding="utf-8") as f:
-        return json.load(f)
-
-
 @pytest.fixture(scope="module")
 def fichax():
-    return _carrega("golden_fichax.json.gz")["fichas"]
+    return carregar_golden("golden_fichax.json.gz")["fichas"]
 
 
 @pytest.fixture(scope="module")
 def paridade():
-    return _carrega("golden_paridade.json.gz")["fichas"]
+    return carregar_golden("golden_paridade.json.gz")["fichas"]
 
 
 def _normaliza(obj):

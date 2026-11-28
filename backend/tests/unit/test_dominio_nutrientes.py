@@ -3,16 +3,11 @@
 Inclui verificação cruzada com o golden dataset (rótulos e ordem das linhas
 produzidas pelo sistema original — D-008).
 """
-import gzip
-import json
-from pathlib import Path
-
 import pytest
 
 from apps.fichas.dominio.arredondamento import arredonda_anvisa, round_half_down
 from apps.fichas.dominio.nutrientes import NUTRIENTES, ORDEM_ROTULO, POR_CHAVE
-
-GOLDEN = Path(__file__).resolve().parent.parent / "golden" / "golden_fichax.json.gz"
+from tests.golden_loader import carregar_golden
 
 
 # --- BR-006: round_half_down -------------------------------------------------
@@ -81,8 +76,7 @@ def test_indentados_batem_com_original():
 # --- Verificação cruzada com o golden dataset (D-008) -------------------------
 @pytest.fixture(scope="module")
 def golden():
-    with gzip.open(GOLDEN, "rt", encoding="utf-8") as f:
-        return json.load(f)
+    return carregar_golden("golden_fichax.json.gz")
 
 
 def test_golden_rotulos_sao_subconjunto_do_registro(golden):

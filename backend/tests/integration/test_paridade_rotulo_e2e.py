@@ -8,17 +8,13 @@ banco de teste não tem o acervo (ex.: CI sem o dump). Para rodar com os dados
 reais: DATABASE_URL apontando para a cópia restaurada e
 `pytest --reuse-db -k paridade_rotulo_e2e`.
 """
-import gzip
-import json
 import re
-from pathlib import Path
 
 import pytest
 from django.contrib.auth.models import User
 
 from apps.fichas.models import Ficha
-
-GOLDEN = Path(__file__).resolve().parent.parent / "golden" / "golden_fichax.json.gz"
+from tests.golden_loader import carregar_golden
 
 TABELA_VERTICAL = re.compile(r'<table class="rotulo-vertical">(.*?)</table>', re.S)
 LINHA = re.compile(r"<tr>(.*?)</tr>", re.S)
@@ -58,8 +54,7 @@ def _linhas_esperadas(ficha_golden):
 
 @pytest.fixture(scope="module")
 def golden():
-    with gzip.open(GOLDEN, "rt", encoding="utf-8") as f:
-        return json.load(f)["fichas"]
+    return carregar_golden("golden_fichax.json.gz")["fichas"]
 
 
 @pytest.mark.django_db
